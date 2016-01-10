@@ -1,0 +1,27 @@
+<% if notice %>
+  <p id="notice"><%= notice %></p>
+<% end %>
+
+<h1>Shearling and accesories</h1>
+
+<table>
+  <tbody>
+
+  <% @products.each_slice(3) do |row| %>
+    <tr>
+    <% row.each do |product| %>
+      <td>
+        <div class="entry">
+          <%= image_tag(product.images.first.get_image) %>
+          <h3><%= link_to product.name, action: :show, id: product.id %></h3>
+          <%= sanitize(product.description) %>
+          <div class="price_line">
+            <span class="price"><%= number_to_currency product.price %> </span>
+          </div>
+        </div>
+      </td>
+    <% end %>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

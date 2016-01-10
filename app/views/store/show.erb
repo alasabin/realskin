@@ -1,0 +1,21 @@
+<h1>Show item</h1>
+<p><%= @product.category %> </p>
+<p><%= @product.type %> </p>
+<div>
+  <%=@product.name%>
+</div>
+<div>
+  <%=sanitize @product.description %>
+</div>
+<div>
+  <%=number_to_currency @product.price %>
+</div>
+<div>
+  <%=@product.size %>
+</div>
+
+<% @product.images.each do |img|%>
+  <%= image_tag img.get_image %>
+<% end %>
+<%= button_to 'Add to Cart', line_items_path(product_id: @product.id)%>
+<%= link_to "back", store_path %>

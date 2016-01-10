@@ -1,0 +1,178 @@
+<%= form_for @product, :html => { :multipart => true } do |f| %>
+  <% if @product.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</h2>
+
+      <ul>
+      <% @product.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <table>
+    <tr>
+      <td width="160px">
+        <div class="field">
+          <%= f.select :category, options_for_select(Product::P_CATEGORIES) %>
+        </div>
+      </td>
+      <td width="300px">
+        <div class="field">
+          <%= f.select :title, options_for_select(Product::P_TITLES) %>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="2">
+        <div class="field">
+          <%= f.label :name %><br>
+          <%= f.text_field :name, width: "300px" %>
+          <%=f.check_box :activated %>
+          <%=f.label "active" %>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <div class="field">
+          <%= f.label :description %><br>
+          <%= f.text_area :description, rows: 6 %>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <div class="field">
+          <%= f.label :price %><br>
+          <%= f.text_field :price %>
+        </div>
+        <div class="field">
+          <%= f.label :count %><br>
+          <%= f.number_field :count %>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="field">
+          <%= f.label :size %><br>
+          <%= f.select :size, options_for_select(Product::P_SIZES) %>
+        </div>
+        <div class="field">
+          <%= f.label :brand %><br>
+          <%= f.select :brand, options_for_select(Product::P_BRANDS) %>
+        </div>
+        <div class="field">
+          <%= f.label :country %><br>
+          <%= f.select :country, options_for_select(Product::P_COUNTRIES) %>
+        </div>
+        <div class="field">
+          <%= f.label :color %><br>
+          <%= f.select :color, options_for_select(Product::P_COLORS) %>
+        </div>
+        <div class="field">
+          <%= f.label :material %><br>
+          <%= f.select :material, options_for_select(Product::P_MATERIALS) %>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <script>
+  function readURL(input) {
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      var curr_div = document.getElementById("img_div");
+      var img_count = $("#img_div").find('img').length;
+      var img_id = input.id.replace("browse_", "");
+
+      if (input.id.indexOf("prev") > 0 ){
+        reader.onload = function (e) {
+          $('#img_prev')
+              .attr('src', e.target.result)
+              .width(150)
+              .height(200)
+              .attr('id', "img_new_" + (img_count))
+              .attr('onclick', "$('#browse_img_new_" + (img_count) + "\').click()");
+        };
+        $('#browse_img_prev')
+            .attr('name', "product[avatar]" + (img_count))
+            .attr('id', "browse_img_new_" + (img_count));
+
+        var del_img = document.createElement("img");
+        del_img.setAttribute('id', "del_img_" + (img_count));
+        del_img.setAttribute('src', "/assets/DelImage.jpg");
+        del_img.setAttribute('onclick', "removeURL(this)");
+        curr_div.appendChild(del_img);
+
+        var new_img = document.createElement("img");
+        new_img.setAttribute('id', "img_prev");
+        new_img.setAttribute('src', "/assets/NoImage.jpg");
+        new_img.setAttribute('onclick', "document.getElementById(\'browse_img_prev\').click()");
+        curr_div.appendChild(new_img);
+
+        var new_input_file = document.createElement("input");
+        new_input_file.setAttribute('id', "browse_img_prev");
+        new_input_file.setAttribute('name', "product[avatar]");
+        new_input_file.setAttribute('onchange', "readURL(this);");
+        new_input_file.setAttribute('type', "file");
+        new_input_file.setAttribute('style', "visibility:hidden;position:absolute;top:0;left:0");
+        curr_div.appendChild(new_input_file);
+
+      } else {
+        chg_img = document.getElementById(img_id);
+        reader.onload = function (e) {
+          chg_img.setAttribute('src', e.target.result);
+          chg_img.width(150);
+          chg_img.height(200);
+        };
+      }
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+    function removeURL(input) {
+      var curr_div = document.getElementById("img_div");
+      var del_id = input.id.replace("del_img_", "");
+
+      //new image should be removed with input
+      //existing image should be transfer to controller
+      if ($("#img_new_" + (del_id)).length){
+        curr_div.removeChild(document.getElementById("browse_img_new_" + del_id));
+        curr_div.removeChild(document.getElementById("img_new_" + del_id));
+        curr_div.removeChild(document.getElementById("del_img_" + del_id));
+      } else {
+        var del_list = $("#product_removed_img").attr('value');
+
+        if (del_list.length) {
+          del_list = del_list.concat("," + del_id );
+        } else {
+          del_list = del_list.concat(del_id);
+        }
+
+        $("#product_removed_img").attr('value',  del_list );
+
+        curr_div.removeChild(document.getElementById("browse_img_" + del_id));
+        curr_div.removeChild(document.getElementById("img_" + del_id));
+        curr_div.removeChild(document.getElementById("del_img_" + del_id));
+      }
+    }
+  </script>
+
+  <div id="img_div" class="img_divcl">
+    <% @product.images.each do |img| %>
+      <%= image_tag img.get_image, width: 150, height: 200, onclick: "$('#browse_img_" + img.id.to_s + "').click()", id: 'img_' + img.id.to_s %>
+      <%= f.file_field "avatar", :id => 'browse_img_' + img.id.to_s, :onchange => "readURL(this);", :style => "visibility:hidden;position:absolute;top:0;left:0" %>
+      <%= image_tag "DelImage.jpg", :id => 'del_img_' + img.id.to_s, onclick: "removeURL(this)"%>
+    <% end %>
+    <img id="img_prev" src="/assets/NoImage.jpg" alt="your image" onclick="document.getElementById('browse_img_prev').click()"/>
+    <%= f.file_field "avatar", :id => 'browse_img_prev', :onchange => "readURL(this);", :style => "visibility:hidden;position:absolute;top:0;left:0" %>
+    <%= f.hidden_field :removed_img, :value => "" %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
+
+
